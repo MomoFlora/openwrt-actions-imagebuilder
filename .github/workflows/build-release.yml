@@ -96,7 +96,7 @@ jobs:
           sudo /usr/bin/caddy start --config caddyfile --adapter caddyfile
 
       - name: 🗑️ 释放磁盘空间
-        uses: sbwml/actions@free-disk
+        uses: MomoFlora/actions@free-disk
         with:
           build-mount-path: /builder
 
