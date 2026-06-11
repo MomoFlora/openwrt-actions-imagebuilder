@@ -1,0 +1,62 @@
+name: Build releases
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: 'Select the build device'
+        required: true
+        default: 'x86_64'
+        type: choice
+        options:
+          - 'friendlyarm_nanopi-r2c'
+          - 'friendlyarm_nanopi-r2c-plus'
+          - 'friendlyarm_nanopi-r2s'
+          - 'friendlyarm_nanopi-r3s'
+          - 'friendlyarm_nanopi-r4s'
+          - 'friendlyarm_nanopi-r5c'
+          - 'friendlyarm_nanopi-r5s'
+          - 'friendlyarm_nanopi-r6c'
+          - 'friendlyarm_nanopi-r6s'
+          - 'friendlyarm_nanopi-r76s'
+          - 'hinlink_h28k'
+          - 'linkease_easepi-r1'
+          - 'lunzn_fastrhino-r66s'
+          - 'x86_64'
+      version:
+        description: 'Select the build version'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - 'v24.10.7'
+          - 'v25.12.4'
+      lan_addr:
+        description: 'Setting default LAN address'
+        required: true
+        default: '10.0.0.1'
+        type: string
+      root_password:
+        description: 'Setting default root password (Optional, No password by default)'
+        required: false
+        default: 'ppassword'
+        type: string
+
+jobs:
+  build:
+    name: Build ${{ github.event.inputs.device }}
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@main
+
+      - name: Setup variables
+        run: |
+          sudo timedatectl set-timezone 'Asia/Shanghai'
+          git config --global user.name 'actions'
+          git config --global user.email 'action@github.com'
+          echo build_dir="/builder" >> "$GITHUB_ENV"
