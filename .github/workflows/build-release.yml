@@ -51,12 +51,54 @@ jobs:
         shell: bash
 
     steps:
-      - name: Checkout code
+      - name: 📥 检出仓库代码
+        continue-on-error: true
         uses: actions/checkout@main
+        with:
+          path: openwrt-actions-imagebuilder
 
-      - name: Setup variables
+      - name: ⚙️ 初始化编译环境
         run: |
           sudo timedatectl set-timezone 'Asia/Shanghai'
           git config --global user.name 'actions'
           git config --global user.email 'action@github.com'
           echo build_dir="/builder" >> "$GITHUB_ENV"
+
+      - name: 📊 显示编译环境信息
+        run: |
+          echo "::group::📊 编译环境信息"
+
+          echo -e "\n\033[1;32m🖥️ CPU 信息\033[0m"
+          echo "型号：$(awk -F': ' '/model name/ {print $2; exit}' /proc/cpuinfo)"
+          echo "频率：$(awk -F': ' '/cpu MHz/ {printf "%.0f MHz", $2; exit}' /proc/cpuinfo)"
+          echo "核心：$(nproc) 核"
+
+          echo -e "\n\033[1;32m💾 内存使用情况\033[0m"
+          free -h
+
+          echo -e "\n\033[1;32m📦 存储空间\033[0m"
+          df -hT / /mnt
+
+          echo -e "\n\033[1;32m🐧 系统信息\033[0m"
+          lsb_release -ds
+          uname -srmo
+
+          echo "::endgroup::"
+
+      - name: 📦 安装 Caddy 服务器
+        run: |
+          sudo curl -sL -o /usr/bin/caddy https://github.com/sbwml/r4s_build_script/releases/download/caddy/caddy
+          sudo chmod 755 /usr/bin/caddy
+          echo ":8080 {" > caddyfile
+          echo "    root * $(pwd)/openwrt-actions-imagebuilder" >> caddyfile
+          echo "    file_server browse" >> caddyfile
+          echo "}" >> caddyfile
+          sudo /usr/bin/caddy start --config caddyfile --adapter caddyfile
+
+      - name: 🗑️ 释放磁盘空间
+        uses: sbwml/actions@free-disk
+        with:
+          build-mount-path: /builder
+
+      - name: 🛠️ 配置编译环境
+        uses: MomoFlora/actions@imagebuilder-build-setup
