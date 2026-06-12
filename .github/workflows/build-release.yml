@@ -29,8 +29,8 @@ on:
         default: '25.12.4'
         type: choice
         options:
-          - '24.10.7'
-          - '25.12.4'
+          - 'v24.10.7'
+          - 'v25.12.4'
       lan_addr:
         description: 'Setting default LAN address'
         required: true
