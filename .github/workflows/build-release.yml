@@ -105,17 +105,18 @@ jobs:
         working-directory: /builder
         id: imagebuilder
         run: |
-          echo -e "\n=============================="
-          echo "📦 开始选择 Image Builder"
-          echo "=============================="
+          echo -e "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📦 获取并解压 Image Builder"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
           device="${{ github.event.inputs.device }}"
-          echo "📱 当前选择设备: $device"
+
+          echo "📱 当前设备: $device"
 
           case "$device" in
             x86_64)
               target="x86-64"
-              echo "🖥️ 架构类型: x86_64 (通用PC/虚拟机)"
+              echo "🖥️ 架构类型: x86_64 (通用 PC / 虚拟机)"
               ;;
             friendlyarm_nanopi-r2c|\
             friendlyarm_nanopi-r2c-plus|\
@@ -142,31 +143,52 @@ jobs:
           imagebuilder="openwrt-imagebuilder-$version-$target.Linux-x86_64.tar.zst"
 
           echo ""
-          echo "🔗 下载地址构建完成:"
+          echo "🔗 下载地址:"
           echo "   https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/$imagebuilder"
+
           echo ""
-
           echo "⬇️ 正在下载 Image Builder..."
-          curl -L -o "$imagebuilder" "https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/$imagebuilder"
+          curl -fL# -o "$imagebuilder" \
+            "https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/$imagebuilder"
 
+          echo ""
+          echo "📏 压缩包大小:"
+          du -h "$imagebuilder"
+
+          echo ""
           echo "📁 创建工作目录..."
           mkdir -p openwrt
 
           echo "📦 正在解压 Image Builder..."
           tar --zstd -xf "$imagebuilder" \
-              --strip-components=1 \
-              -C openwrt
+            --strip-components=1 \
+            -C openwrt
+
+          echo ""
+          echo "🗑️ 清理压缩包..."
+          rm -f "$imagebuilder"
 
           echo ""
           echo "📋 openwrt 目录内容:"
-          ls -lah openwrt | sed '1d; s/^/   /'
+          find openwrt -maxdepth 1 -mindepth 1 -printf '   📄 %f\n'
+
+          echo ""
+          echo "🗂️ Image Builder 目录: openwrt"
 
           echo "imagebuilder_dir=openwrt" >> "$GITHUB_OUTPUT"
 
-          echo "🗂️ Image Builder 目录: openwrt"
-
-          echo "imagebuilder_dir=$image_dir" >> "$GITHUB_OUTPUT"
+          {
+            echo "## 📦 Image Builder 信息"
+            echo ""
+            echo "| 项目 | 信息 |"
+            echo "| --- | --- |"
+            echo "| 📱 设备 | $device |"
+            echo "| 🧠 架构 | $target |"
+            echo "| 🏷️ 版本 | $version |"
+            echo "| 📂 工作目录 | /builder/openwrt |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "✅ Image Builder 准备完成"
-          echo "=============================="
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
