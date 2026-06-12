@@ -99,8 +99,8 @@ jobs:
       - name: 🛠️ 配置编译环境
         uses: MomoFlora/actions@imagebuilder-build-setup
 
-      - name: 📂 获取并解压 SDK
-        uses: MomoFlora/actions@openwrt-sdk-settings
-        with:
-          version: ${{ github.event.inputs.version }}
-          target: ${{ github.event.inputs.device }}
+      - name: 📂 获取并解压 Image Builder
+        working-directory: /builder
+        id: imagebuilder
+        run: |
+          
