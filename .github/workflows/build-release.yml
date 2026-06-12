@@ -147,15 +147,21 @@ jobs:
           echo ""
 
           echo "⬇️ 正在下载 Image Builder..."
-          wget -q --show-progress \
-            "https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/$imagebuilder"
+          curl -L -o "$imagebuilder" "https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/$imagebuilder"
 
-          echo "📦 解压中..."
-          tar --zstd -xf "$imagebuilder"
+          echo "📂 创建工作目录..."
+          mkdir -p openwrt
 
-          image_dir=$(find . -maxdepth 1 -type d -name 'openwrt-imagebuilder-*' | head -n1)
+          echo "📦 正在解压 Image Builder 到 openwrt 目录..."
+          tar --zstd -xf "$imagebuilder" -C openwrt
 
-          echo "📁 解压目录: $image_dir"
+          echo ""
+          echo "📋 openwrt 目录内容:"
+          ls -lah openwrt | sed '1d; s/^/   /'
+          
+          image_dir=$(find openwrt -mindepth 1 -maxdepth 1 -type d -name 'openwrt-imagebuilder-*' | head -n1)
+
+          echo "🗂️ Image Builder 目录: $image_dir"
 
           echo "imagebuilder_dir=$image_dir" >> "$GITHUB_OUTPUT"
 
