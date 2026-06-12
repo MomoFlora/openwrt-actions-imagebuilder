@@ -192,3 +192,11 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "✅ Image Builder 准备完成"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: 🚀 编译 OpenWrt 固件
+        working-directory: /builder
+        if: steps.imagebuilder.outcome == 'success'
+        id: compile
+        run: |
+          bash <(curl -sS http://127.0.0.1:8080/build.sh) ${{ github.event.inputs.device }}
+          
