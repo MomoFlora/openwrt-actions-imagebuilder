@@ -105,6 +105,60 @@ jobs:
         working-directory: /builder
         id: imagebuilder
         run: |
-          https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/openwrt-imagebuilder-$version-rockchip-armv8.Linux-x86_64.tar.zst
-          https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/openwrt-imagebuilder-$version-x86-64.Linux-x86_64.tar.zst
-          
+          echo -e "\n=============================="
+          echo "📦 开始选择 Image Builder"
+          echo "=============================="
+
+          device="${{ github.event.inputs.device }}"
+          echo "📱 当前选择设备: $device"
+
+          case "$device" in
+            x86_64)
+              target="x86-64"
+              echo "🖥️ 架构类型: x86_64 (通用PC/虚拟机)"
+              ;;
+            friendlyarm_nanopi-r2c|\
+            friendlyarm_nanopi-r2c-plus|\
+            friendlyarm_nanopi-r2s|\
+            friendlyarm_nanopi-r3s|\
+            friendlyarm_nanopi-r4s|\
+            friendlyarm_nanopi-r5c|\
+            friendlyarm_nanopi-r5s|\
+            friendlyarm_nanopi-r6c|\
+            friendlyarm_nanopi-r6s|\
+            friendlyarm_nanopi-r76s|\
+            hinlink_h28k|\
+            linkease_easepi-r1|\
+            lunzn_fastrhino-r66s)
+              target="rockchip-armv8"
+              echo "🧠 架构类型: Rockchip ARMv8"
+              ;;
+            *)
+              echo "❌ 未支持的设备: $device"
+              exit 1
+              ;;
+          esac
+
+          imagebuilder="openwrt-imagebuilder-$version-$target.Linux-x86_64.tar.zst"
+
+          echo ""
+          echo "🔗 下载地址构建完成:"
+          echo "   https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/$imagebuilder"
+          echo ""
+
+          echo "⬇️ 正在下载 Image Builder..."
+          wget -q --show-progress \
+            "https://github.com/MomoFlora/openwrt-actions-imagebuilder/releases/download/imagebuilder/$imagebuilder"
+
+          echo "📦 解压中..."
+          tar --zstd -xf "$imagebuilder"
+
+          image_dir=$(find . -maxdepth 1 -type d -name 'openwrt-imagebuilder-*' | head -n1)
+
+          echo "📁 解压目录: $image_dir"
+
+          echo "imagebuilder_dir=$image_dir" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "✅ Image Builder 准备完成"
+          echo "=============================="
